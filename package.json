@@ -4,9 +4,6 @@
 	"description": "Node.js http(s) proxy tester",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
-	"scripts": {
-		"dev": "ts-node-dev --respawn src/index.ts"
-	},
 	"author": "Devin Higley",
 	"license": "MIT",
 	"files": [
