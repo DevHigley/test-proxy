@@ -34,7 +34,7 @@ function test(proxy: Proxy, options: { timeout?: number; hostname?: string }): P
 					proxy: Object.assign(proxy, { protocol: httpsResult.ok ? "https" : "http" })
 				});
 			})
-			.catch((err) => reject({ err: err, proxy: proxy }));
+			.catch((err) => reject({ err: err.message, proxy: proxy }));
 	});
 }
 
@@ -55,7 +55,7 @@ function checkHttp(proxy: Proxy, timeout?: number, hostname?: string): Promise<{
 			reject(new Error("Request timed out"));
 			request.destroy();
 		});
-		request.on("error", (err) => reject(err.message));
+		request.on("error", (err) => reject(err));
 		request.end();
 	});
 }
