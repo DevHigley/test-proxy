@@ -17,8 +17,8 @@ What does it do:
 ## Installation
 
 ```
-npm install test-proxy
-yarn add test-proxy
+npm install @devhigley/test-proxy
+yarn add @devhigley/test-proxy
 ```
 
 ## Usage
