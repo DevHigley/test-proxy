@@ -1,5 +1,5 @@
 {
-	"name": "test-proxy",
+	"name": "@devhigley/test-proxy",
 	"version": "1.0.0",
 	"description": "Node.js http(s) proxy tester",
 	"main": "./dist/index.js",
