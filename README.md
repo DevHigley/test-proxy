@@ -2,9 +2,9 @@
 
 ## Description
 
-test-proxy is a lightweight nodejs http(s) proxy testing library.
+test-proxy is a lightweight Node.js http(s) proxy testing library
 
-What does it do:
+### What it does:
 
 -   tests http(s) proxies
 -   checks response time (ms)
@@ -23,7 +23,7 @@ yarn add @devhigley/test-proxy
 
 ## Usage
 ```js
-const testProxy = require("test-proxy");
+const testProxy = require("@devhigley/test-proxy");
 
 testProxy({ host: "89.187.177.91", port: 80 })
 	.then((result) => console.log(result))
