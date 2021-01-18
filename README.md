@@ -27,9 +27,10 @@ const testProxy = require("@devhigley/test-proxy");
 
 testProxy({ host: "89.187.177.91", port: 80 })
 	.then((result) => console.log(result))
-	.catch((err) => console.log(err));
-
-//result on success
+	.catch((error) => console.log(error));
+```
+#### Result on success:
+```js
 {
   http: true,
   https: true,
@@ -37,9 +38,11 @@ testProxy({ host: "89.187.177.91", port: 80 })
   responseTime: 279,
   proxy: { host: '89.187.177.91', port: 80, protocol: "https" }
 }
-//on failure
+```
+#### Result on failure:
+```js
 {
-  err: '503 Service Unavailable',
+  error: '503 Service Unavailable',
   proxy: { host: '89.187.177.91', port: 80 }
 }
 ```
