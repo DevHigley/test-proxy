@@ -3,27 +3,27 @@ import http from "http";
 interface Proxy {
 	host: string;
 	port: number;
+	protocol?: string;
 	auth?: {
 		username: string;
 		password: string;
 	};
-	protocol?: "http" | "https";
 }
 
 interface TestResult {
 	http: boolean;
 	https: boolean;
-	proxy: Proxy;
 	anonymous: boolean;
 	responseTime: number;
+	proxy: Proxy;
 }
 
-function test(proxy: Proxy, options: { timeout?: number; hostname?: string }): Promise<TestResult> {
+function test(proxy: Proxy, options?: { timeout?: number; hostname?: string }): Promise<TestResult> {
 	return new Promise((resolve, reject) => {
 		Promise.all([
 			process.env.ip_address || getIpAddress(),
-			checkHttp(proxy, options.timeout, options.hostname),
-			checkHttps(proxy, options.timeout, options.hostname)
+			checkHttp(proxy, options?.timeout, options?.hostname),
+			checkHttps(proxy, options?.timeout, options?.hostname)
 		])
 			.then(([ipAddress, httpResult, httpsResult]) => {
 				resolve({
@@ -34,7 +34,7 @@ function test(proxy: Proxy, options: { timeout?: number; hostname?: string }): P
 					proxy: Object.assign(proxy, { protocol: httpsResult.ok ? "https" : "http" })
 				});
 			})
-			.catch((err) => reject({ err: err.message, proxy: proxy }));
+			.catch((error) => reject({ error: error.message, proxy: proxy }));
 	});
 }
 
@@ -55,7 +55,7 @@ function checkHttp(proxy: Proxy, timeout?: number, hostname?: string): Promise<{
 			reject(new Error("Request timed out"));
 			request.destroy();
 		});
-		request.on("error", (err) => reject(err));
+		request.on("error", (error) => reject(error));
 		request.end();
 	});
 }
@@ -92,7 +92,7 @@ function getIpAddress(): Promise<string> {
 		http.get("http://api.ipify.org/", (res) => {
 			res.setEncoding("utf8");
 			res.on("data", (data) => resolve(data));
-		}).on("error", (e) => reject(e));
+		}).on("error", (error) => reject(error));
 	});
 }
 
