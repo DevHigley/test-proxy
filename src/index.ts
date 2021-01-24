@@ -3,7 +3,7 @@ import http from "http";
 interface Proxy {
 	host: string;
 	port: number;
-	protocol?: string;
+	protocol: string;
 	auth?: {
 		username: string;
 		password: string;
@@ -11,88 +11,76 @@ interface Proxy {
 }
 
 interface TestResult {
-	http: boolean;
-	https: boolean;
-	anonymous: boolean;
+	ok: boolean;
+	anonymous?: boolean;
+	responseTime?: number;
+	error?: string;
+}
+
+interface PingResult {
+	ok: boolean;
+	headers: string[];
 	responseTime: number;
-	proxy: Proxy;
 }
 
 function test(proxy: Proxy, options?: { timeout?: number; hostname?: string }): Promise<TestResult> {
-	return new Promise((resolve, reject) => {
-		Promise.all([
-			process.env.ip_address || getIpAddress(),
-			checkHttp(proxy, options?.timeout, options?.hostname),
-			checkHttps(proxy, options?.timeout, options?.hostname)
-		])
-			.then(([ipAddress, httpResult, httpsResult]) => {
+	return new Promise((resolve) => {
+		Promise.all([process.env.IP_ADDRESS || getIpAddress(), ping(proxy, options?.timeout, options?.hostname)])
+			.then(([ipAddress, result]) =>
 				resolve({
-					http: httpResult.ok,
-					https: httpsResult.ok,
-					anonymous: isAnonymous(ipAddress, httpResult.headers),
-					responseTime: httpResult.responseTime,
-					proxy: Object.assign(proxy, { protocol: httpsResult.ok ? "https" : "http" })
-				});
-			})
-			.catch((error) => reject({ error: error.message, proxy: proxy }));
+					ok: result.ok,
+					anonymous: isAnonymous(ipAddress, result.headers),
+					responseTime: result.responseTime
+				})
+			)
+			.catch((error) => resolve({ ok: false, error: error.message }));
 	});
 }
 
-function checkHttp(proxy: Proxy, timeout?: number, hostname?: string): Promise<{ ok: boolean; headers: string[]; responseTime: number }> {
+function ping(proxy: Proxy, timeout?: number, hostname?: string): Promise<PingResult> {
 	return new Promise((resolve, reject) => {
-		const options = generateOptions(proxy, "http", timeout, hostname);
+		const options = createOptions(proxy, timeout, hostname);
 		const startTime = new Date().getTime();
-		const request = http.get(options, (res) => {
+		const request = http.request(options, (res) => {
 			if (res.statusCode === 200)
 				resolve({
 					ok: true,
 					headers: res.rawHeaders,
 					responseTime: new Date().getTime() - startTime
 				});
-			else reject(new Error(`${res.statusCode} ${res.statusMessage}`));
+			else request.destroy(new Error(`${res.statusCode} ${res.statusMessage}`));
 		});
-		request.on("timeout", () => {
-			reject(new Error("Request timed out"));
-			request.destroy();
-		});
+		request.on("timeout", () => request.destroy(new Error("Request timed out")));
 		request.on("error", (error) => reject(error));
 		request.end();
 	});
 }
 
-function checkHttps(proxy: Proxy, timeout?: number, hostname?: string): Promise<{ ok: boolean }> {
-	return new Promise((resolve) => {
-		const options = generateOptions(proxy, "https", timeout, hostname);
-		const request = http.get(options, (res) => resolve({ ok: res.statusCode === 200 }));
-		request.on("timeout", () => request.destroy());
-		request.on("error", () => request.destroy());
-		request.end();
-	});
-}
-
-function generateOptions(proxy: Proxy, protocol: string, timeout?: number, hostname?: string): object {
+function createOptions(proxy: Proxy, timeout?: number, hostname?: string) {
 	return {
 		host: proxy.host,
 		port: proxy.port,
 		timeout: timeout,
-		path: hostname ? `${protocol}://${hostname}` : `${protocol}://api.ipify.org`,
+		path: `${proxy.protocol}://${hostname ? hostname : "api.ipify.org"}`,
 		headers: {
-			host: hostname || "api.ipify.org",
-			"Proxy-Authorization": createProxyAuth(proxy.auth)
+			Host: hostname || "api.ipify.org",
+			...(proxy.auth && { "Proxy-Authorization": createProxyAuth(proxy.auth) })
 		}
 	};
 }
 
-function createProxyAuth(auth?: { username: string; password: string }): string {
-	return auth ? `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString("base64")}` : "";
+function createProxyAuth(auth: { username: string; password: string }): string {
+	return `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString("base64")}`;
 }
 
 function getIpAddress(): Promise<string> {
 	return new Promise((resolve, reject) => {
-		http.get("http://api.ipify.org/", (res) => {
+		const request = http.get("http://api.ipify.org/", (res) => {
 			res.setEncoding("utf8");
 			res.on("data", (data) => resolve(data));
-		}).on("error", (error) => reject(error));
+		});
+		request.on("error", (error) => reject(error));
+		request.end();
 	});
 }
 
