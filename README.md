@@ -1,4 +1,4 @@
-# test-proxy
+# test-proxy [![Build Status](https://travis-ci.com/DevHigley/test-proxy.svg?branch=master)](https://travis-ci.com/DevHigley/test-proxy)
 
 ## Description
 
