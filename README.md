@@ -7,7 +7,7 @@ test-proxy is a lightweight Node.js http(s) proxy testing library
 ### What it does:
 
 -   tests http(s) proxies
--   checks response time (ms)
+-   checks latency (ms)
 -   checks proxy anonymity (boolean)
 -   checks support for specific hostname
 -   supports proxy authentication
@@ -26,26 +26,17 @@ yarn add @devhigley/test-proxy
 ```js
 const testProxy = require("@devhigley/test-proxy");
 
-const proxy = { host: "89.187.177.91", port: 80, protocol: "http" };
+const proxy = { host: "89.187.177.91", port: 80 };
 
 testProxy(proxy).then((result) => console.log(result));
 ```
 
-#### Result on success:
+#### Result:
 
 ```js
 {
-  ok: true,
-  anonymous: true,
-  responseTime: 1337
-}
-```
-
-#### Result on failure:
-
-```js
-{
-  ok: false,
-  error: '503 Service Unavailable'
+  type: "http",
+  latency: 1337,
+  anonymous: true
 }
 ```
