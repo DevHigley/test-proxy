@@ -45,7 +45,7 @@ function test(proxy: Proxy, options?: Options): Promise<TestResult> {
 					latency: httpResult.value.latency,
 					anonymous: isAnonymous(ipAddress, httpResult.value.headers)
 				});
-			} else reject(httpResult.reason.message);
+			} else reject({ error: httpResult.reason.message });
 		});
 	});
 }

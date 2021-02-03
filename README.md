@@ -32,11 +32,15 @@ testProxy(proxy).then((result) => console.log(result));
 ```
 
 #### Result:
-
+on success:
 ```js
 {
   type: "http",
   latency: 1337,
   anonymous: true
 }
+```
+on failure:
+```js
+{ error: '503 Service Unavailable' }
 ```
