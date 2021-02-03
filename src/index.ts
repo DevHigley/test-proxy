@@ -83,7 +83,6 @@ function createOptions(proxy: Proxy, options?: Options) {
 }
 
 function getIpAddress(): Promise<string> {
-	console.log("getIpAddress");
 	return new Promise((resolve) =>
 		http.get("http://api.ipify.org", (res) => {
 			res.setEncoding("utf-8");
